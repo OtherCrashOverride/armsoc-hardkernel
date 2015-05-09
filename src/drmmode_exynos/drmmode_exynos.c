@@ -112,6 +112,8 @@ static int init_plane_for_cursor(int drm_fd, uint32_t plane_id)
 	return res;
 }
 
+#define EXYNOS_BO_WC (1 << 2)
+
 static int create_custom_gem(int fd, struct armsoc_create_gem *create_gem)
 {
 	struct drm_exynos_gem_create create_exynos;
@@ -130,7 +132,7 @@ static int create_custom_gem(int fd, struct armsoc_create_gem *create_gem)
 	 * When they are supported all allocations are effectively contiguous
 	 * anyway, so for simplicity we always request non contiguous buffers.
 	 */
-	create_exynos.flags = EXYNOS_BO_NONCONTIG;
+	create_exynos.flags = EXYNOS_BO_NONCONTIG | EXYNOS_BO_WC;
 
 	ret = drmIoctl(fd, DRM_IOCTL_EXYNOS_GEM_CREATE, &create_exynos);
 	if (ret)
