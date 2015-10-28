@@ -861,7 +861,7 @@ ARMSOCPreInit(ScrnInfoPtr pScrn, int flags)
 	pARMSOC->useUmplock = xf86ReturnOptValBool(pARMSOC->pOptionInfo,
 			OPTION_UMP_LOCK, FALSE);
 	INFO_MSG("umplock is %s",
-				pARMSOC->useUmplock ? "Disabled" : "Enabled");
+				pARMSOC->useUmplock ? "Enabled" : "Disabled");
 
 	/*
 	 * Select the video modes:

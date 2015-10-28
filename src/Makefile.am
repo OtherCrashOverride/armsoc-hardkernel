@@ -49,4 +49,5 @@ armsoc_drv_la_SOURCES = \
          armsoc_dri2.c \
          armsoc_driver.c \
          armsoc_dumb.c \
+         exynos_fimg2d.c \
          $(DRMMODE_SRCS)
