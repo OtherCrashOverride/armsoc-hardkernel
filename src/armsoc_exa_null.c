@@ -158,11 +158,11 @@ PrepareCopy(PixmapPtr pSrc, PixmapPtr pDst, int xdir, int ydir,
 	//Dump_armsoc_bo(srcPriv->bo);
 	//Dump_armsoc_bo(dstPriv->bo);
 
-	if (pSrc->drawable.width < 32 || pSrc->drawable.height < 32 ||
-		pDst->drawable.width < 32 || pDst->drawable.height < 32)
-	{
-		return FALSE;
-	}
+	//if (pSrc->drawable.width < 32 || pSrc->drawable.height < 32 ||
+	//	pDst->drawable.width < 32 || pDst->drawable.height < 32)
+	//{
+	//	return FALSE;
+	//}
 
 
 	// If there are no buffer objects, fallback
@@ -213,9 +213,15 @@ PrepareCopy(PixmapPtr pSrc, PixmapPtr pDst, int xdir, int ydir,
 	//armsoc_bo_cpu_prep(srcPriv->bo, ARMSOC_GEM_READ);
 	//armsoc_bo_cpu_prep(dstPriv->bo, ARMSOC_GEM_READ_WRITE);
 	
-	if (ARMSOCPrepareAccess(pSrc, EXA_PREPARE_SRC) == FALSE ||
-		ARMSOCPrepareAccess(pDst, EXA_PREPARE_DEST) == FALSE)
+
+	if (ARMSOCPrepareAccess(pSrc, EXA_PREPARE_SRC) == FALSE)
 	{
+		return FALSE;
+	}
+	
+	if (ARMSOCPrepareAccess(pDst, EXA_PREPARE_DEST) == FALSE)
+	{
+		ARMSOCFinishAccess(pSrc, EXA_PREPARE_SRC);
 		return FALSE;
 	}
 
@@ -263,6 +269,10 @@ static void ExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY
 	struct g2d_image srcImage;
 	struct g2d_image dstImage;
 
+	//int i;
+	//unsigned char* ptr;
+	//int dummy;
+
 	/*
 	xf86DrvMsg(-1, X_ERROR, "ExaCopy :srcX=%d, srcY=%d, dstX=%d, dstY=%d, width=%d, height=%d | src_bpp=%d, dst_bpp=%d\n",
 		srcX, srcY, dstX, dstY, width, height, srcPriv->bo->bpp, dstPriv->bo->bpp);
@@ -306,14 +316,14 @@ static void ExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY
 
 	//if (srcPriv->bo->map_addr == 0)
 	//{
-		srcImage.buf_type = G2D_IMGBUF_GEM;
-		srcImage.bo[0] = srcPriv->bo->handle;
+	//	srcImage.buf_type = G2D_IMGBUF_GEM;
+	//	srcImage.bo[0] = srcPriv->bo->handle;
 	//}
 	//else
 	//{
-	//	srcImage.buf_type = G2D_IMGBUF_USERPTR;
-	//	srcImage.user_ptr[0].userptr = (unsigned long)srcPriv->bo->map_addr;
-	//	srcImage.user_ptr[0].size = srcPriv->bo->size;
+		srcImage.buf_type = G2D_IMGBUF_USERPTR;
+		srcImage.user_ptr[0].userptr = (unsigned long)srcPriv->bo->map_addr;
+		srcImage.user_ptr[0].size = srcPriv->bo->size;
 	//}
 
 	//srcPriv->bo->refcnt += 1;
@@ -355,16 +365,28 @@ static void ExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY
 	
 	//if (dstPriv->bo->map_addr == 0)
 	//{
-		dstImage.buf_type = G2D_IMGBUF_GEM;
-		dstImage.bo[0] = dstPriv->bo->handle;
+	//	dstImage.buf_type = G2D_IMGBUF_GEM;
+	//	dstImage.bo[0] = dstPriv->bo->handle;
 	//}
 	//else
 	//{
-	//	dstImage.buf_type = G2D_IMGBUF_USERPTR;
-	//	dstImage.user_ptr[0].userptr = (unsigned long)dstPriv->bo->map_addr;
-	//	dstImage.user_ptr[0].size = dstPriv->bo->size;
+		dstImage.buf_type = G2D_IMGBUF_USERPTR;
+		dstImage.user_ptr[0].userptr = (unsigned long)dstPriv->bo->map_addr;
+		dstImage.user_ptr[0].size = dstPriv->bo->size;
 	//}
 
+	//// Debug: Touch all memory to bring it in
+	//ptr = (unsigned char*)srcPriv->bo->map_addr;
+	//for (i = 0; i < srcPriv->bo->size; i += 4096)
+	//{
+	//	dummy += ptr[i];
+	//}
+
+	//ptr = (unsigned char*)dstPriv->bo->map_addr;
+	//for (i = 0; i < dstPriv->bo->size; i += 4096)
+	//{
+	//	dummy += ptr[i];
+	//}
 
 	// Debug testing - solid fill source
 	//g2d_solid_fill(ctx, &srcImage, srcX, srcY, width, height);
